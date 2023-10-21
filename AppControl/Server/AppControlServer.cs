@@ -32,7 +32,7 @@ public class AppControlServer : IDisposable
         {
             while (true)
             {
-                await _clientRepository.DisconnectIdleClientsAsync();
+                await _clientRepository.DisconnectIdleClientsAsync(ClientDisappeared);
                 await Task.Delay(10000);
             }
         }, TaskCreationOptions.LongRunning);
@@ -76,13 +76,13 @@ public class AppControlServer : IDisposable
             return;
         }
         
-        var validatingArgs = new ValidatingConnectionEventArgs
+        var validatingArgs = new ValidateClientEventArgs()
         {
             AuthPacket = authPacket,
             Client = incomingClient
         };
 
-        ValidatingConnectionAsync?.Invoke(validatingArgs);
+        ValidateClient?.Invoke(validatingArgs);
 
         if (validatingArgs.ReasonCode != ConnectReasonCode.Success)
         {
@@ -97,10 +97,17 @@ public class AppControlServer : IDisposable
         
         _logger.LogWarning($"Client {authPacket.ClientId} has connected");
 
+        ClientConnected?.Invoke(new ClientConnectedEventArgs()
+        {
+            Client = incomingClient
+        });
+        
         await Task.Factory.StartNew(() => incomingClient.StartListeningAsync(), TaskCreationOptions.LongRunning);
     }
 
-    public event Func<ValidatingConnectionEventArgs, Task> ValidatingConnectionAsync;
+    public event Func<ValidateClientEventArgs, Task> ValidateClient;
+    public event Func<ClientConnectedEventArgs, Task> ClientConnected;
+    public event Func<ClientConnectedEventArgs, Task> ClientDisappeared;
 
     public void Dispose()
     {

@@ -2,7 +2,7 @@ using AppControl.Protocol;
 
 namespace AppControl.Server;
 
-public class ValidatingConnectionEventArgs
+public class ValidateClientEventArgs
 {
     public AuthPacket AuthPacket { get; set; }
     public ConnectReasonCode ReasonCode { get; set; }
