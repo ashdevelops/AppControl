@@ -1,10 +1,10 @@
 namespace AppControl.Client;
 
-public class GangClientPinger
+public class AppControlClientPinger
 {
-    private readonly GangClient _client;
+    private readonly AppControlClient _client;
 
-    public GangClientPinger(GangClient client)
+    public AppControlClientPinger(AppControlClient client)
     {
         _client = client;
     }

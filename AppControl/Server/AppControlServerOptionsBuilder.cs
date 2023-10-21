@@ -3,13 +3,13 @@ using Microsoft.Extensions.Configuration;
 
 namespace AppControl.Server;
 
-public class GangServerOptionsBuilder
+public class AppControlServerOptionsBuilder
 {
-    private readonly GangServerOptions _options = new();
+    private readonly AppControlServerOptions _options = new();
 
-    public GangServerOptionsBuilder WithTcpOptions(IPAddress ipAddress, int port, int backlog = 500)
+    public AppControlServerOptionsBuilder WithTcpOptions(IPAddress ipAddress, int port, int backlog = 500)
     {
-        _options.TcpOptions = new GangServerTcpOptions()
+        _options.TcpOptions = new AppControlServerTcpOptions()
         {
             IpAddress = ipAddress,
             Port = port,
@@ -19,7 +19,7 @@ public class GangServerOptionsBuilder
         return this;
     }
 
-    public GangServerOptionsBuilder WithSecretKeyValidation(string secretKey)
+    public AppControlServerOptionsBuilder WithSecretKeyValidation(string secretKey)
     {
         _options.SecretKeyValidation = true;
         _options.SecretKey = secretKey;
@@ -27,13 +27,13 @@ public class GangServerOptionsBuilder
         return this;
     }
 
-    public GangServerOptionsBuilder RequireUniqueClientIds()
+    public AppControlServerOptionsBuilder RequireUniqueClientIds()
     {
         _options.RequireUniqueClientIds = true;
         return this;
     }
 
-    public GangServerOptionsBuilder CreateDefaultBuilder(IConfiguration configuration)
+    public AppControlServerOptionsBuilder CreateDefaultBuilder(IConfiguration configuration)
     {
         var secretKey = configuration.GetValue<string>("Networking:Validation:SecretKey");
         var host = configuration.GetValue<string>("Networking:Host");
@@ -49,7 +49,7 @@ public class GangServerOptionsBuilder
             .WithTcpOptions(IPAddress.Parse(host), port);
     }
     
-    public GangServerOptions Build()
+    public AppControlServerOptions Build()
     {
         return _options;
     }

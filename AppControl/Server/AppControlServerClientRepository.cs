@@ -2,12 +2,12 @@ using Microsoft.Extensions.Logging;
 
 namespace AppControl.Server;
 
-public class GangServerClientRepository
+public class AppControlServerClientRepository
 {
-    private readonly ILogger<GangServerClientRepository> _logger;
+    private readonly ILogger<AppControlServerClientRepository> _logger;
     public readonly Dictionary<string, IncomingClient> _clients = new();
 
-    public GangServerClientRepository(ILogger<GangServerClientRepository> logger)
+    public AppControlServerClientRepository(ILogger<AppControlServerClientRepository> logger)
     {
         _logger = logger;
     }

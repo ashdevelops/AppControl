@@ -7,21 +7,21 @@ using AppControl.Server;
 
 namespace AppControl.Client;
 
-public class GangClient : IDisposable
+public class AppControlClient : IDisposable
 {
-    private readonly ILogger<GangClient> _logger;
-    private GangClientOptions? _options;
-    private readonly GangClientPinger _pinger;
+    private readonly ILogger<AppControlClient> _logger;
+    private AppControlClientOptions? _options;
+    private readonly AppControlClientPinger _pinger;
     private readonly TcpClient _client = new();
     private readonly byte[] _buffer = new byte[2048 * 4];
 
-    public GangClient(ILogger<GangClient> logger)
+    public AppControlClient(ILogger<AppControlClient> logger)
     {
         _logger = logger;
-        _pinger = new GangClientPinger(this);
+        _pinger = new AppControlClientPinger(this);
     }
 
-    public async Task StartLongTermSessionAsync(GangClientOptions options)
+    public async Task StartLongTermSessionAsync(AppControlClientOptions options)
     {
         _logger.LogInformation("Starting a long term session...");
         
@@ -36,7 +36,7 @@ public class GangClient : IDisposable
         }
     }
 
-    private async Task ConnectAsync(GangClientOptions options)
+    private async Task ConnectAsync(AppControlClientOptions options)
     {
         _logger.LogInformation("Connecting to the server...");
         
@@ -127,7 +127,7 @@ public class GangClient : IDisposable
             return;
         }
 
-        var args = new GangApplicationMessageReceivedEventArgs
+        var args = new AppControlApplicationMessageReceivedEventArgs
         {
             Content = content
         };
@@ -135,7 +135,7 @@ public class GangClient : IDisposable
         MessageReceivedAsync?.Invoke(args);
     }
     
-    public event Func<GangApplicationMessageReceivedEventArgs, Task>? MessageReceivedAsync;
+    public event Func<AppControlApplicationMessageReceivedEventArgs, Task>? MessageReceivedAsync;
     
     private bool _disposed;
     

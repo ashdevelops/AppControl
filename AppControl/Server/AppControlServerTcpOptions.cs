@@ -2,7 +2,7 @@ using System.Net;
 
 namespace AppControl.Server;
 
-public class GangServerTcpOptions
+public class AppControlServerTcpOptions
 {
     public IPAddress IpAddress { get; set; }
     public int Port { get; set; }

@@ -5,17 +5,17 @@ using AppControl.Protocol;
 
 namespace AppControl.Server;
 
-public class GangServer : IDisposable
+public class AppControlServer : IDisposable
 {
-    private readonly ILogger<GangServer> _logger;
-    private readonly GangServerOptions _serverOptions;
-    private readonly GangServerTcpOptions _tcpOptions;
+    private readonly ILogger<AppControlServer> _logger;
+    private readonly AppControlServerOptions _serverOptions;
+    private readonly AppControlServerTcpOptions _tcpOptions;
     private readonly TcpListener _listener;
-    private readonly GangServerClientRepository _clientRepository;
+    private readonly AppControlServerClientRepository _clientRepository;
 
-    public GangServer(ILogger<GangServer> logger, 
-        GangServerClientRepository clientRepository, 
-        GangServerOptions serverOptions)
+    public AppControlServer(ILogger<AppControlServer> logger, 
+        AppControlServerClientRepository clientRepository, 
+        AppControlServerOptions serverOptions)
     {
         _logger = logger;
         _serverOptions = serverOptions;

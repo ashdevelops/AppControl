@@ -3,31 +3,31 @@ using Microsoft.Extensions.Configuration;
 
 namespace AppControl.Client;
 
-public class GangClientOptionsBuilder
+public class AppControlClientOptionsBuilder
 {
-    private readonly GangClientOptions _options = new();
+    private readonly AppControlClientOptions _options = new();
     
-    public GangClientOptionsBuilder WithClientId(string clientId)
+    public AppControlClientOptionsBuilder WithClientId(string clientId)
     {
         _options.ClientId = clientId;
         return this;
     }
 
-    public GangClientOptionsBuilder WithSecretKey(string secretKey)
+    public AppControlClientOptionsBuilder WithSecretKey(string secretKey)
     {
         _options.SecretKey = secretKey;
         return this;
     }
 
-    public GangClientOptionsBuilder RetryOnFailedToConnect()
+    public AppControlClientOptionsBuilder RetryOnFailedToConnect()
     {
         _options.RetryOnFailedToConnect = true;
         return this;
     }
 
-    public GangClientOptionsBuilder WithTcpOptions(IPAddress ipAddress, int port)
+    public AppControlClientOptionsBuilder WithTcpOptions(IPAddress ipAddress, int port)
     {
-        _options.TcpOptions = new GangClientTcpOptions
+        _options.TcpOptions = new AppControlClientTcpOptions
         {
             Address = ipAddress,
             Port = port
@@ -36,7 +36,7 @@ public class GangClientOptionsBuilder
         return this;
     }
     
-    public GangClientOptionsBuilder CreateDefaultBuilder(IConfiguration configuration)
+    public AppControlClientOptionsBuilder CreateDefaultBuilder(IConfiguration configuration)
     {
         var clientId = configuration.GetValue<string>("Networking:ClientId");
         var secretKey = configuration.GetValue<string>("Networking:Validation:SecretKey");
@@ -54,7 +54,7 @@ public class GangClientOptionsBuilder
             .RetryOnFailedToConnect();
     }
     
-    public GangClientOptions Build()
+    public AppControlClientOptions Build()
     {
         return _options;
     }

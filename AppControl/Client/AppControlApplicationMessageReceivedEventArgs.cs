@@ -1,6 +1,6 @@
 namespace AppControl.Client;
 
-public class GangApplicationMessageReceivedEventArgs : EventArgs
+public class AppControlApplicationMessageReceivedEventArgs : EventArgs
 {
     public string Content { get; set; }
 }
