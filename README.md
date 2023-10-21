@@ -2,7 +2,7 @@
 
 ### Server
 
-```
+```cs
 var config = host.Services.GetRequiredService<IConfiguration>();
 var factory = new AppControlFactory(host.Services);
 
@@ -20,7 +20,7 @@ await server.ListenAsync(CancellationToken.None);
 
 ### Client
 
-```
+```cs
 var config = host.Services.GetRequiredService<IConfiguration>();
 var factory = new AppControlFactory(host.Services);
 
