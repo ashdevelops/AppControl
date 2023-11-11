@@ -14,7 +14,8 @@ public class AppControlServer : IDisposable
     private readonly TcpListener _listener;
     private readonly AppControlServerClientRepository _clientRepository;
 
-    public AppControlServer(ILogger<AppControlServer> logger, 
+    public AppControlServer(
+        ILogger<AppControlServer> logger, 
         AppControlServerClientRepository clientRepository, 
         AppControlServerOptions serverOptions)
     {
@@ -36,7 +37,7 @@ public class AppControlServer : IDisposable
             while (true)
             {
                 await _clientRepository.DisconnectIdleClientsAsync(ClientDisappeared);
-                await Task.Delay(10000);
+                await Task.Delay(5000);
             }
         }, TaskCreationOptions.LongRunning);
     }

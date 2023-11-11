@@ -14,7 +14,6 @@ public class AppControlClient : IDisposable
     private AppControlClientOptions? _options;
     private readonly AppControlClientPinger _pinger;
     private readonly TcpClient _client = new();
-    private readonly byte[] _buffer = new byte[2048 * 4];
 
     public AppControlClient(ILogger<AppControlClient> logger)
     {
@@ -38,10 +37,10 @@ public class AppControlClient : IDisposable
             _logger.LogWarning("Session ended unexpectedly :|");
         }
     }
-
+    
     private async Task ConnectAsync(AppControlClientOptions options)
     {
-        _logger.LogInformation("Connecting to the server...");
+        _logger.LogInformation("Attempting to connect to the AppServer...");
         
         _options = options;
         
@@ -50,15 +49,16 @@ public class AppControlClient : IDisposable
         try
         {
             await _client.ConnectAsync(new IPEndPoint(tcpOptions.Address, tcpOptions.Port));
+            _logger.LogInformation("We are now connected to the AppServer!");
         }
-        catch (SocketException se)
+        catch (Exception e)
         {
-            if (!_options.RetryOnFailedToConnect)
+            if (!_options.RetryOnFailedToConnect || e is not (SocketException or IOException))
             {
                 throw;
             }
             
-            _logger.LogWarning("Failed to connect to server :|");
+            _logger.LogWarning("Couldn't connect to the AppServer, waiting and retrying...");
             
             await Task.Delay(5000);
             await ConnectAsync(options);
@@ -160,6 +160,7 @@ public class AppControlClient : IDisposable
     }
     
     public event Func<AppControlApplicationMessageReceivedEventArgs, Task>? MessageReceivedAsync;
+    public event Func<AppControlApplicationMessageReceivedEventArgs, Task>? OnSessionEndedAsync;
     
     private bool _disposed;
     
