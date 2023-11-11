@@ -9,12 +9,10 @@ namespace AppControl.Server;
 public class IncomingClient
 {
     private readonly TcpClient _client;
-    private readonly byte[] _buffer;
 
     public IncomingClient(TcpClient client)
     {
         _client = client;
-        _buffer = new byte[4096];
     }
 
     public string ClientId { get; set; }
@@ -61,7 +59,7 @@ public class IncomingClient
         }
         
         var buffer = new byte[messageLength];
-        var messageBytesRead = await _client.GetStream().ReadAsync(buffer);
+        await _client.GetStream().ReadAsync(buffer);
         
         return buffer;
     }
@@ -71,7 +69,7 @@ public class IncomingClient
         await WriteAsync(Encoding.Default.GetBytes(s));
     }
 
-    public async Task WriteAsync(byte[] bytes)
+    private async Task WriteAsync(byte[] bytes)
     {
         bytes = FramingProtocol.WrapMessage(bytes);
         await _client.GetStream().WriteAsync(bytes);

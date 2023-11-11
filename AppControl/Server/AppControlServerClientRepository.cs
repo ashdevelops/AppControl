@@ -17,7 +17,7 @@ public class AppControlServerClientRepository
         _clients[client.ClientId] = client;
     }
 
-    public async Task DisconnectIdleClientsAsync(Func<ClientConnectedEventArgs, Task> onClientDisappeared)
+    public async Task DisconnectIdleClientsAsync(Func<ClientConnectedEventArgs, Task>? onClientDisappeared)
     {
         foreach (var client in _clients.Values)
         {

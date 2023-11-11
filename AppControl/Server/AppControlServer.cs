@@ -80,17 +80,17 @@ public class AppControlServer : IDisposable
             return;
         }
         
-        var validatingArgs = new ValidateClientEventArgs()
+        var validatingArgs = new ValidateClientEventArgs
         {
             AuthPacket = authPacket,
             Client = incomingClient
         };
 
-        ValidateClient?.Invoke(validatingArgs);
+        await ValidateClient(validatingArgs);
 
-        if (validatingArgs.ReasonCode != ConnectReasonCode.Success)
+        if (validatingArgs.ReasonCode != DenyConnectReasonCode.Success)
         {
-            _logger.LogWarning($"Failed with: {validatingArgs.ReasonCode.ToString()}, closing connection...");
+            _logger.LogWarning($"Client denied with: {validatingArgs.ReasonCode.ToString()}, closing connection...");
             await incomingClient.DisposeWithReasonAsync(validatingArgs.ReasonCode.ToString());
             return;
         }
@@ -109,9 +109,9 @@ public class AppControlServer : IDisposable
         await Task.Factory.StartNew(() => incomingClient.StartListeningAsync(), TaskCreationOptions.LongRunning);
     }
 
-    public event Func<ValidateClientEventArgs, Task> ValidateClient;
-    public event Func<ClientConnectedEventArgs, Task> ClientConnected;
-    public event Func<ClientConnectedEventArgs, Task> ClientDisappeared;
+    public event Func<ValidateClientEventArgs, Task>? ValidateClient;
+    public event Func<ClientConnectedEventArgs, Task>? ClientConnected;
+    public event Func<ClientConnectedEventArgs, Task>? ClientDisappeared;
 
     public void Dispose()
     {
