@@ -2,6 +2,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Reflection;
 using System.Text;
+using AppControl.Other;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using AppControl.Server;
@@ -111,11 +112,18 @@ public class AppControlClient : IDisposable
     {
         while (_client.Connected)
         {
-            OnReceived(await ReceiveAsync());
+            var data = await ReceiveAsync();
+
+            if (data.Length < 1)
+            {
+                return;
+            }
+            
+            OnReceived(data);
         }
     }
-    
-    public async Task<byte[]> ReceiveAsync()
+
+    private async Task<byte[]> ReceiveAsync()
     {
         var lengthPrefixBytes = new byte[sizeof(int)];
         
@@ -155,12 +163,24 @@ public class AppControlClient : IDisposable
         {
             Content = content
         };
+
+        var packet = JsonConvert.DeserializeObject<NetworkPacket>(content);
+        
+        if (packet is { Name: "FailedAuth" } && packet.Data.TryGetValue("reason", out var reason))
+        {
+            OnAuthFailed?.Invoke(new AppControlApplicationAuthFailedEventArgs
+            {
+                Reason = reason.ToString() ?? string.Empty
+            });
+            
+            return;
+        }
         
         MessageReceivedAsync?.Invoke(args);
     }
     
     public event Func<AppControlApplicationMessageReceivedEventArgs, Task>? MessageReceivedAsync;
-    public event Func<AppControlApplicationMessageReceivedEventArgs, Task>? OnSessionEndedAsync;
+    public event Func<AppControlApplicationAuthFailedEventArgs, Task>? OnAuthFailed;
     
     private bool _disposed;
     

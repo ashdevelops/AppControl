@@ -1,6 +1,7 @@
 using System.Buffers;
 using System.Net.Sockets;
 using System.Text;
+using AppControl.Other;
 using Newtonsoft.Json;
 
 namespace AppControl.Server;
@@ -65,6 +66,11 @@ public class IncomingClient
         return buffer;
     }
 
+    public async Task WriteAsync(string s)
+    {
+        await WriteAsync(Encoding.Default.GetBytes(s));
+    }
+
     public async Task WriteAsync(byte[] bytes)
     {
         bytes = FramingProtocol.WrapMessage(bytes);
@@ -73,7 +79,12 @@ public class IncomingClient
 
     public async Task DisposeWithReasonAsync(string reason)
     {
-        await WriteAsync(Encoding.Default.GetBytes(reason));
+        var disconnectPacket = new NetworkPacket("FailedAuth", new Dictionary<string, object>
+        {
+            { "reason", reason }
+        });
+        
+        await WriteAsync(JsonConvert.SerializeObject(disconnectPacket));
         
         _client.Client.Shutdown(SocketShutdown.Both);
         _client.Dispose();
