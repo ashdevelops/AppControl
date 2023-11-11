@@ -1,3 +1,4 @@
+using System.Buffers;
 using System.Net.Sockets;
 using System.Text;
 using Newtonsoft.Json;
@@ -30,7 +31,8 @@ public class IncomingClient
     {
         while (_client.Connected)
         {
-            var message = Encoding.Default.GetString(await ReceiveAsync());
+            var dataReceived = await ReceiveAsync();
+            var message = Encoding.Default.GetString(dataReceived);
 
             if (message == "PING")
             {
@@ -39,18 +41,33 @@ public class IncomingClient
             }
         }
     }
-
+    
     public async Task<byte[]> ReceiveAsync()
     {
-        var bytes = await _client.Client.ReceiveAsync(_buffer, SocketFlags.None);
-        var data = new byte[bytes];
-        Buffer.BlockCopy(_buffer, 0, data, 0, bytes);
+        var messageLengthBytes = new byte[4];
+        var bytesRead = await _client.GetStream().ReadAsync(messageLengthBytes, 0, 4);
 
-        return data;
+        if (bytesRead < 4)
+        {
+            return Array.Empty<byte>();
+        }
+        
+        var messageLength = BitConverter.ToInt32(messageLengthBytes);
+
+        if (messageLength == 0)
+        {
+            return Array.Empty<byte>();
+        }
+        
+        var buffer = new byte[messageLength];
+        var messageBytesRead = await _client.GetStream().ReadAsync(buffer);
+        
+        return buffer;
     }
 
     public async Task WriteAsync(byte[] bytes)
     {
+        bytes = FramingProtocol.WrapMessage(bytes);
         await _client.GetStream().WriteAsync(bytes);
     }
 

@@ -1,4 +1,5 @@
 using System.Net.Sockets;
+using System.Reflection;
 using System.Text;
 using Microsoft.Extensions.Logging;
 using AppControl.Protocol;
@@ -22,6 +23,8 @@ public class AppControlServer : IDisposable
         _tcpOptions = serverOptions.TcpOptions;
         _listener = new TcpListener(_tcpOptions.IpAddress, _tcpOptions.Port);
         _clientRepository = clientRepository;
+        
+        _logger.LogWarning($"Loaded version {Assembly.GetAssembly(typeof(AppControlServer))?.GetName().Version?.ToString()} of AppControl package");
     }
 
     public async Task StartAsync()

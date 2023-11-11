@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Sockets;
+using System.Reflection;
 using System.Text;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
@@ -19,6 +20,8 @@ public class AppControlClient : IDisposable
     {
         _logger = logger;
         _pinger = new AppControlClientPinger(this);
+        
+        _logger.LogWarning($"Loaded version {Assembly.GetAssembly(typeof(AppControlServer))?.GetName().Version?.ToString()} of AppControl package");
     }
 
     public async Task StartLongTermSessionAsync(AppControlClientOptions options)
@@ -76,7 +79,9 @@ public class AppControlClient : IDisposable
         };
 
         var authPacketString = JsonConvert.SerializeObject(authPacket);
-        await WriteAsync(Encoding.Default.GetBytes(authPacketString));
+        var authPacketBytes = Encoding.Default.GetBytes(authPacketString);
+        
+        await WriteAsync(authPacketBytes);
     }
 
     private async Task StartPingingAsync()
@@ -97,7 +102,8 @@ public class AppControlClient : IDisposable
         {
             return;
         }
-        
+
+        data = FramingProtocol.WrapMessage(data);
         await _client.GetStream().WriteAsync(data);
     }
     
@@ -105,20 +111,38 @@ public class AppControlClient : IDisposable
     {
         while (_client.Connected)
         {
-            var bytes = await _client.Client.ReceiveAsync(_buffer, SocketFlags.None);
-                
-            if (bytes > 0)
-            {
-                OnReceived(bytes);
-            }
+            OnReceived(await ReceiveAsync());
         }
     }
-
-    private void OnReceived(int bytesReceived)
+    
+    public async Task<byte[]> ReceiveAsync()
     {
-        var data = new byte[bytesReceived];
-        Buffer.BlockCopy(_buffer, 0, data, 0, bytesReceived);
+        var lengthPrefixBytes = new byte[sizeof(int)];
+        
+        try
+        {
+            await _client.GetStream().ReadExactlyAsync(lengthPrefixBytes);
+        }
+        catch (EndOfStreamException)
+        {
+            return Array.Empty<byte>();
+        }
+        
+        var messageLength = BitConverter.ToInt32(lengthPrefixBytes);
 
+        if (messageLength == 0)
+        {
+            return Array.Empty<byte>();
+        }
+
+        var buffer = new byte[messageLength];
+        await _client.GetStream().ReadExactlyAsync(buffer);
+
+        return buffer;
+    }
+
+    private void OnReceived(byte[] data)
+    {
         var content = Encoding.Default.GetString(data);
 
         if (content == "PONG")
