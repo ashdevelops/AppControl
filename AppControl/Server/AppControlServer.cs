@@ -80,19 +80,22 @@ public class AppControlServer : IDisposable
             return;
         }
         
-        var validatingArgs = new ValidateClientEventArgs
+        if (ValidateClient != null)
         {
-            AuthPacket = authPacket,
-            Client = incomingClient
-        };
+            var validatingArgs = new ValidateClientEventArgs
+            {
+                AuthPacket = authPacket,
+                Client = incomingClient
+            };
 
-        await ValidateClient(validatingArgs);
+            await ValidateClient.Invoke(validatingArgs);
 
-        if (validatingArgs.ReasonCode != DenyConnectReasonCode.Success)
-        {
-            _logger.LogWarning($"Client denied with: {validatingArgs.ReasonCode.ToString()}, closing connection...");
-            await incomingClient.DisposeWithReasonAsync(validatingArgs.ReasonCode.ToString());
-            return;
+            if (!string.IsNullOrEmpty(validatingArgs.DenyMessage))
+            {
+                _logger.LogWarning($"Client denied with: {validatingArgs.DenyMessage}, closing connection...");
+                await incomingClient.DisposeWithReasonAsync(validatingArgs.DenyMessage);
+                return;
+            }
         }
 
         incomingClient.ClientId = authPacket.ClientId;

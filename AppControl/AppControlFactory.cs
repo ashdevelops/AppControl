@@ -20,7 +20,6 @@ public class AppControlFactory
 
     public AppControlServer CreateServer(AppControlServerOptions options)
     {
-        var clientRepository = ActivatorUtilities.CreateInstance<AppControlServerClientRepository>(_serviceProvider);
-        return ActivatorUtilities.CreateInstance<AppControlServer>(_serviceProvider, options, clientRepository);
+        return ActivatorUtilities.CreateInstance<AppControlServer>(_serviceProvider, options);
     }
 }
