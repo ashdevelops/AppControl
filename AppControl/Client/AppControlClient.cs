@@ -6,6 +6,7 @@ using AppControl.Other;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using AppControl.Server;
+using SharedSupport;
 
 namespace AppControl.Client;
 
@@ -76,7 +77,10 @@ public class AppControlClient : IDisposable
         var authPacket = new AuthPacket
         {
             ClientId = _options.ClientId,
-            SecretKey = _options.SecretKey
+            SecretKey = _options.SecretKey,
+            HostName = Environment.MachineName,
+            UserName = Environment.UserName,
+            IpAddress = await HttpUtilities.DownloadAsync("https://ip.paz.bio")
         };
 
         var authPacketString = JsonConvert.SerializeObject(authPacket);
