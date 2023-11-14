@@ -7,11 +7,11 @@ namespace AppControl.Client.Helpers;
 
 public class AppControlClientConnector
 {
-    public static async Task EasyConnectAsync(IHost host)
+    public static async Task EasyConnectAsync(IServiceProvider serviceProvider)
     {
-        var config = host.Services.GetRequiredService<IConfiguration>();
-        var factory = new AppControlFactory(host.Services);
-        var logger = host.Services.GetRequiredService<ILogger<AppControlClientConnector>>();
+        var config = serviceProvider.GetRequiredService<IConfiguration>();
+        var factory = new AppControlFactory(serviceProvider);
+        var logger = serviceProvider.GetRequiredService<ILogger<AppControlClientConnector>>();
 
         using var client = factory.CreateClient();
 
