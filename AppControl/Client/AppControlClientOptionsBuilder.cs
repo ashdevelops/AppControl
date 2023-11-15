@@ -43,7 +43,7 @@ public class AppControlClientOptionsBuilder
         var host = configuration.GetValue<string>("Networking:Host");
         var port = configuration.GetValue<int>("Networking:Port");
         
-        if (clientId == null || secretKey == null || host == null || port == 0)
+        if (string.IsNullOrEmpty(clientId) || string.IsNullOrEmpty(secretKey) || string.IsNullOrEmpty(host) || port == 0)
         {
             throw new Exception("Failed to build default builder due to missing config items");
         }
