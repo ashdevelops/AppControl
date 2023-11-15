@@ -6,7 +6,7 @@ using AppControl.Other;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using AppControl.Server;
-using SharedSupport;
+using Paz.SharedSupport.Utilities;
 
 namespace AppControl.Client;
 
@@ -51,7 +51,6 @@ public class AppControlClient : IDisposable
         try
         {
             await _client.ConnectAsync(new IPEndPoint(tcpOptions.Address, tcpOptions.Port));
-            _logger.LogInformation("We are now connected to the AppServer!");
         }
         catch (Exception e)
         {
@@ -114,6 +113,8 @@ public class AppControlClient : IDisposable
     
     private async Task StartListeningAsync()
     {
+        _logger.LogInformation("We are now connected to the AppServer!");
+        
         while (_client.Connected)
         {
             var data = await ReceiveAsync();
