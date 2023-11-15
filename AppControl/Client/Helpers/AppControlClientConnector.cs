@@ -38,6 +38,6 @@ public class AppControlClientConnector
             return Task.CompletedTask;
         };
 
-        client.StartLongTermSessionAsync(options);
+        await client.StartLongTermSessionAsync(options);
     }
 }

@@ -29,15 +29,10 @@ public class AppControlClient : IDisposable
     {
         _logger.LogInformation("Starting a long term session...");
         
-        while (true)
-        {
-            await ConnectAsync(options);
-            await SendAuthPacketAsync();
-            await StartPingingAsync();
-            await StartListeningAsync();
-            
-            _logger.LogWarning("Session ended unexpectedly :|");
-        }
+        await ConnectAsync(options);
+        await SendAuthPacketAsync();
+        await StartPingingAsync();
+        StartListeningAsync();
     }
     
     private async Task ConnectAsync(AppControlClientOptions options)
