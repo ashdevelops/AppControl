@@ -102,7 +102,7 @@ public class AppControlServer : IDisposable
 
         _clientRepository.AddClient(incomingClient);
         
-        _logger.LogWarning($"Client {authPacket.ClientId} has connected");
+        _logger.LogWarning($"Client '{authPacket.ClientId}' has connected");
 
         ClientConnected?.Invoke(new ClientConnectedEventArgs()
         {
