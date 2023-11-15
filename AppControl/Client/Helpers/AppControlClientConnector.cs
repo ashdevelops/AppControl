@@ -13,7 +13,7 @@ public class AppControlClientConnector
         var factory = new AppControlFactory(serviceProvider);
         var logger = serviceProvider.GetRequiredService<ILogger<AppControlClientConnector>>();
 
-        using var client = factory.CreateClient();
+        var client = factory.CreateClient();
 
         var options = new AppControlClientOptionsBuilder()
             .CreateDefaultBuilder(config)
