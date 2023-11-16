@@ -73,6 +73,18 @@ public class AppControlServer : IDisposable
             await incomingClient.DisposeWithReasonAsync("Failed secret key validation");
             return;
         }
+
+        if (string.IsNullOrEmpty(authPacket.VersionTag))
+        {
+            await incomingClient.DisposeWithReasonAsync($"Client connected with an empty version tag");
+            return;
+        }
+
+        if (string.IsNullOrEmpty(authPacket.ClientId))
+        {
+            await incomingClient.DisposeWithReasonAsync($"Client connected with an empty identifier");
+            return;
+        }
         
         if (_serverOptions.RequireUniqueClientIds && _clientRepository._clients.ContainsKey(authPacket.ClientId))
         {
