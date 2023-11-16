@@ -32,12 +32,16 @@ public class AppControlClient : IDisposable
         await ConnectAsync(options);
         await SendAuthPacketAsync();
         await StartPingingAsync();
+        
         StartListeningAsync();
     }
     
-    private async Task ConnectAsync(AppControlClientOptions options)
+    private async Task ConnectAsync(AppControlClientOptions options, int attempt = 0)
     {
-        _logger.LogInformation("Attempting to connect to the AppServer...");
+        if (attempt == 0)
+        {
+            _logger.LogInformation("Attempting to connect to the AppServer...");
+        }
         
         _options = options;
         
@@ -49,7 +53,7 @@ public class AppControlClient : IDisposable
         }
         catch (Exception e)
         {
-            if (!_options.RetryOnFailedToConnect || e is not (SocketException or IOException))
+            if (!_options.RetryOnFailedToConnect || e is not (SocketException or IOException) || attempt > 10)
             {
                 throw;
             }
@@ -57,7 +61,7 @@ public class AppControlClient : IDisposable
             _logger.LogWarning("Couldn't connect to the AppServer, waiting and retrying...");
             
             await Task.Delay(5000);
-            await ConnectAsync(options);
+            await ConnectAsync(options, attempt + 1);
         }
     }
 
@@ -108,18 +112,26 @@ public class AppControlClient : IDisposable
     
     private async Task StartListeningAsync()
     {
-        _logger.LogInformation("We are now connected to the AppServer!");
-        
-        while (_client.Connected)
+        try
         {
-            var data = await ReceiveAsync();
+            _logger.LogInformation("We are now connected to the AppServer!");
 
-            if (data.Length < 1)
+            while (_client.Connected)
             {
-                return;
+                var data = await ReceiveAsync();
+
+                if (data.Length < 1)
+                {
+                    return;
+                }
+
+                OnReceived(data);
             }
-            
-            OnReceived(data);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            Environment.Exit(0);
         }
     }
 
