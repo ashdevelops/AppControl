@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
 using System.Reflection;
@@ -6,6 +7,7 @@ using AppControl.Other;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using AppControl.Server;
+using LibGit2Sharp;
 using Paz.SharedSupport.Utilities;
 
 namespace AppControl.Client;
@@ -72,13 +74,21 @@ public class AppControlClient : IDisposable
             throw new Exception("You must establish options before sending the auth packet.");
         }
         
+        var directory = TerminalUtilities.GetShellCommand("git", "rev-parse --show-toplevel");
+        var repo = new Repository(directory.Trim());
+        var branch = repo.Head.FriendlyName;
+        var sha1 = repo.Head.Commits.Last().Sha[..6];
+        var versionTag = $"{branch}:{sha1}";
+        
         var authPacket = new AuthPacket
         {
             ClientId = _options.ClientId,
             SecretKey = _options.SecretKey,
             HostName = Environment.MachineName,
             UserName = Environment.UserName,
-            IpAddress = await HttpUtilities.DownloadAsync("https://ip.paz.bio")
+            IpAddress = await HttpUtilities.DownloadAsync("https://ip.paz.bio"),
+            VersionTag = versionTag,
+            LaunchedAt = Process.GetCurrentProcess().StartTime
         };
 
         var authPacketString = JsonConvert.SerializeObject(authPacket);
