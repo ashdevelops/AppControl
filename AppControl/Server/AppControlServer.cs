@@ -57,7 +57,7 @@ public class AppControlServer : IDisposable
     {
         _logger.LogInformation("A client is trying to connect...");
         
-        var incomingClient = new IncomingClient(client);
+        var incomingClient = new IncomingClient(client, ClientDisappeared);
         var authPacket = await incomingClient.ReceiveAuthPacketAsync();
 
         if (authPacket == null)

@@ -9,10 +9,12 @@ namespace AppControl.Server;
 public class IncomingClient
 {
     private readonly TcpClient _client;
+    private readonly Func<ClientConnectedEventArgs, Task>? _onClientDisappeared;
 
-    public IncomingClient(TcpClient client)
+    public IncomingClient(TcpClient client, Func<ClientConnectedEventArgs, Task>? onClientDisappeared)
     {
         _client = client;
+        _onClientDisappeared = onClientDisappeared;
     }
 
     public string ClientId { get; set; }
@@ -83,6 +85,14 @@ public class IncomingClient
         });
         
         await WriteAsync(JsonConvert.SerializeObject(disconnectPacket));
+
+        if (_onClientDisappeared != null)
+        {
+            await _onClientDisappeared.Invoke(new ClientConnectedEventArgs()
+            {
+                Client = this
+            });
+        }
         
         _client.Client.Shutdown(SocketShutdown.Both);
         _client.Dispose();
