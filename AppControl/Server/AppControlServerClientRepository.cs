@@ -19,6 +19,8 @@ public class AppControlServerClientRepository
 
     public async Task DisconnectIdleClientsAsync(Func<ClientConnectedEventArgs, Task>? onClientDisappeared)
     {
+        _logger.LogInformation("Checking for idle clients...");
+        
         foreach (var client in _clients.Values)
         {
             var hasPinged = client.LastPing != default;
@@ -31,8 +33,12 @@ public class AppControlServerClientRepository
             
             _logger.LogWarning($"Disconnecting idle client '{client.ClientId}'");
             _clients.Remove(client.ClientId);
+
+            if (onClientDisappeared != null)
+            {
+                await onClientDisappeared.Invoke(new ClientConnectedEventArgs { Client = client });
+            }
             
-            await onClientDisappeared.Invoke(new ClientConnectedEventArgs { Client = client });
             await client.DisposeWithReasonAsync("Marked as idle due to missing ping");
         }
     }

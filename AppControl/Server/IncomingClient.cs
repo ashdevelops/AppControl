@@ -77,7 +77,7 @@ public class IncomingClient
 
     public async Task DisposeWithReasonAsync(string reason)
     {
-        var disconnectPacket = new NetworkPacket("FailedAuth", new Dictionary<string, object>
+        var disconnectPacket = new NetworkPacket("DisposedWithReason", new Dictionary<string, object>
         {
             { "reason", reason }
         });
