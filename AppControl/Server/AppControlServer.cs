@@ -65,7 +65,9 @@ public class AppControlServer : IDisposable
             await incomingClient.DisposeWithReasonAsync("Failed to read auth packet");
             return;
         }
-
+        
+        incomingClient.ClientId = authPacket.ClientId;
+        
         if (_serverOptions.SecretKeyValidation && 
             !string.IsNullOrEmpty(_serverOptions.SecretKey) &&
             authPacket.SecretKey != _serverOptions.SecretKey)
@@ -109,8 +111,6 @@ public class AppControlServer : IDisposable
                 return;
             }
         }
-
-        incomingClient.ClientId = authPacket.ClientId;
 
         _clientRepository.AddClient(incomingClient);
         
