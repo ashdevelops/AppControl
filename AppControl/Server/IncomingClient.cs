@@ -19,6 +19,7 @@ public class IncomingClient
 
     public string ClientId { get; set; }
     public DateTime LastPing { get; private set; }
+    public ApplicationSession Session { get; set; }
 
     public async Task<AuthPacket?> ReceiveAuthPacketAsync()
     {
@@ -76,9 +77,13 @@ public class IncomingClient
         bytes = FramingProtocol.WrapMessage(bytes);
         await _client.GetStream().WriteAsync(bytes);
     }
+    
+    public string ExitReason { get; set; }
 
     public async Task DisposeWithReasonAsync(string reason)
     {
+        ExitReason = reason;
+        
         var disconnectPacket = new NetworkPacket("DisposedWithReason", new Dictionary<string, object>
         {
             { "reason", reason }
