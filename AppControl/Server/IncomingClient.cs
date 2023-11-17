@@ -25,8 +25,15 @@ public class IncomingClient
     {
         var authPacketBytes = await ReceiveAsync();
         var authPacketString = Encoding.Default.GetString(authPacketBytes);
-        
-        return JsonConvert.DeserializeObject<AuthPacket>(authPacketString);
+
+        try
+        {
+            return JsonConvert.DeserializeObject<AuthPacket>(authPacketString);
+        }
+        catch (JsonReaderException e)
+        {
+            return null;
+        }
     }
 
     public async Task StartListeningAsync()
