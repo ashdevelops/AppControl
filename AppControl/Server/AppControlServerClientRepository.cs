@@ -23,13 +23,13 @@ public class AppControlServerClientRepository
         
         foreach (var client in _clients.Values)
         {
-            var hasPinged = client.LastPing != default;
             var isMissing = (DateTime.Now - client.LastPing).TotalSeconds >= 5;
 
-            if (!hasPinged || !isMissing)
+            if (!isMissing)
             {
                 continue;
             }
+
             
             _logger.LogWarning($"Disconnecting idle client '{client.ClientId}'");
             _clients.Remove(client.ClientId);

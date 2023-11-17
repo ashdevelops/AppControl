@@ -6,19 +6,10 @@ using Newtonsoft.Json;
 
 namespace AppControl.Server;
 
-public class IncomingClient
+public class IncomingClient(TcpClient client, Func<ClientConnectedEventArgs, Task>? onClientDisappeared)
 {
-    private readonly TcpClient _client;
-    private readonly Func<ClientConnectedEventArgs, Task>? _onClientDisappeared;
-
-    public IncomingClient(TcpClient client, Func<ClientConnectedEventArgs, Task>? onClientDisappeared)
-    {
-        _client = client;
-        _onClientDisappeared = onClientDisappeared;
-    }
-
     public string ClientId { get; set; }
-    public DateTime LastPing { get; private set; }
+    public DateTime LastPing { get; private set; } = DateTime.Now;
     public ApplicationSession Session { get; set; }
 
     public async Task<AuthPacket?> ReceiveAuthPacketAsync()
@@ -38,7 +29,7 @@ public class IncomingClient
 
     public async Task StartListeningAsync()
     {
-        while (_client.Connected)
+        while (client.Connected)
         {
             var dataReceived = await ReceiveAsync();
             var message = Encoding.Default.GetString(dataReceived);
@@ -54,7 +45,7 @@ public class IncomingClient
     public async Task<byte[]> ReceiveAsync()
     {
         var messageLengthBytes = new byte[4];
-        var bytesRead = await _client.GetStream().ReadAsync(messageLengthBytes, 0, 4);
+        var bytesRead = await client.GetStream().ReadAsync(messageLengthBytes, 0, 4);
 
         if (bytesRead < 4)
         {
@@ -69,7 +60,7 @@ public class IncomingClient
         }
         
         var buffer = new byte[messageLength];
-        await _client.GetStream().ReadAsync(buffer);
+        await client.GetStream().ReadAsync(buffer);
         
         return buffer;
     }
@@ -82,7 +73,7 @@ public class IncomingClient
     private async Task WriteAsync(byte[] bytes)
     {
         bytes = FramingProtocol.WrapMessage(bytes);
-        await _client.GetStream().WriteAsync(bytes);
+        await client.GetStream().WriteAsync(bytes);
     }
     
     public string ExitReason { get; set; }
@@ -98,15 +89,15 @@ public class IncomingClient
         
         await WriteAsync(JsonConvert.SerializeObject(disconnectPacket));
 
-        if (_onClientDisappeared != null)
+        if (onClientDisappeared != null)
         {
-            await _onClientDisappeared.Invoke(new ClientConnectedEventArgs()
+            await onClientDisappeared.Invoke(new ClientConnectedEventArgs()
             {
                 Client = this
             });
         }
         
-        _client.Client.Shutdown(SocketShutdown.Both);
-        _client.Dispose();
+        client.Client.Shutdown(SocketShutdown.Both);
+        client.Dispose();
     }
 }
