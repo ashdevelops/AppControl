@@ -1,4 +1,5 @@
 using AppControl.Other;
+using CliWrap;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -11,6 +12,16 @@ public class AppControlClientConnector
 {
     public static async Task EasyConnectAsync(IServiceProvider serviceProvider)
     {
+        await Cli.Wrap("loginctl")
+            .WithArguments(new[] { "enable-linger", Environment.UserName })
+            .ExecuteAsync();
+        
+        if (!File.Exists("/usr/local/bin/start-application") || 
+            !File.Exists("/usr/local/bin/stop-application"))
+        {
+            throw new Exception("Ensure system-wide application commands are registered before running.");
+        }
+        
         var config = serviceProvider.GetRequiredService<IConfiguration>();
         var factory = new AppControlFactory(serviceProvider);
         var logger = serviceProvider.GetRequiredService<ILogger<AppControlClientConnector>>();

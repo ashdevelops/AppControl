@@ -11,6 +11,7 @@ public class IncomingClient(TcpClient client, Func<ClientConnectedEventArgs, Tas
     public string ClientId { get; set; }
     public DateTime LastPing { get; private set; } = DateTime.Now;
     public ApplicationSession Session { get; set; }
+    public bool Validated { get; set; }
 
     public async Task<AuthPacket?> ReceiveAuthPacketAsync()
     {

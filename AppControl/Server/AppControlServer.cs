@@ -3,6 +3,7 @@ using System.Reflection;
 using System.Text;
 using Microsoft.Extensions.Logging;
 using AppControl.Protocol;
+using CliWrap;
 
 namespace AppControl.Server;
 
@@ -30,6 +31,10 @@ public class AppControlServer : IDisposable
 
     public async Task StartAsync()
     {
+        await Cli.Wrap("loginctl")
+            .WithArguments(new[] { "enable-linger", Environment.UserName })
+            .ExecuteAsync();
+        
         _listener.Start(_tcpOptions.Backlog);
         
         await Task.Factory.StartNew(async () =>
