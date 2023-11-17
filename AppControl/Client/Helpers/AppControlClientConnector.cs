@@ -1,7 +1,9 @@
+using AppControl.Other;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 
 namespace AppControl.Client.Helpers;
 
@@ -27,6 +29,19 @@ public class AppControlClientConnector
             }
             
             logger.LogInformation($"Received: {args.Content}");
+
+            var packet = JsonConvert.DeserializeObject<NetworkPacket>(args.Content);
+
+            if (packet != null)
+            {
+                switch (packet.Name)
+                {
+                    case "DisposedWithReason":
+                        Environment.Exit(0);
+                        break;
+                }
+            }
+            
             return Task.CompletedTask;
         };
 
