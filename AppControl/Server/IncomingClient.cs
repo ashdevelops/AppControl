@@ -9,7 +9,7 @@ namespace AppControl.Server;
 public class IncomingClient(TcpClient client, Func<ClientConnectedEventArgs, Task>? onClientDisappeared)
 {
     public string ClientId { get; set; }
-    public DateTime LastPing { get; private set; } = DateTime.Now;
+    public DateTime LastPing { get; set; }
     public ApplicationSession Session { get; set; }
     public bool Validated { get; set; }
 

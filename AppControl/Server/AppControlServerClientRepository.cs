@@ -29,17 +29,16 @@ public class AppControlServerClientRepository
             {
                 continue;
             }
-
             
             _logger.LogWarning($"Disconnecting idle client '{client.ClientId}'");
             _clients.Remove(client.ClientId);
-
+            
+            await client.DisposeWithReasonAsync("Marked as idle due to missing ping");
+            
             if (onClientDisappeared != null)
             {
                 await onClientDisappeared.Invoke(new ClientConnectedEventArgs { Client = client });
             }
-            
-            await client.DisposeWithReasonAsync("Marked as idle due to missing ping");
         }
     }
 }

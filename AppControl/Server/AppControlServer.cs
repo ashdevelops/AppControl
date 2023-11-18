@@ -110,6 +110,7 @@ public class AppControlServer : IDisposable
             }
         }
 
+        incomingClient.LastPing = DateTime.Now;
         _clientRepository.AddClient(incomingClient);
         
         _logger.LogWarning($"Client '{authPacket.ClientId}' has connected");
