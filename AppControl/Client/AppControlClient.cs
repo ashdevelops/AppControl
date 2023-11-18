@@ -197,6 +197,15 @@ public class AppControlClient : IDisposable
             
             return;
         }
+
+        if (packet is { Name: "DisposedWithReason" } && packet.Data.TryGetValue("reason", out var disposeReason))
+        {
+            Dispose();
+            
+            Console.WriteLine($"Terminating session: {disposeReason}");
+            Environment.Exit(1);
+            return;
+        }
         
         MessageReceivedAsync?.Invoke(args);
     }
