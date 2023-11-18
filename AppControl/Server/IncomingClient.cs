@@ -45,25 +45,32 @@ public class IncomingClient(TcpClient client, Func<ClientConnectedEventArgs, Tas
     
     public async Task<byte[]> ReceiveAsync()
     {
-        var messageLengthBytes = new byte[4];
-        var bytesRead = await client.GetStream().ReadAsync(messageLengthBytes, 0, 4);
+        try
+        {
+            var messageLengthBytes = new byte[4];
+            var bytesRead = await client.GetStream().ReadAsync(messageLengthBytes, 0, 4);
 
-        if (bytesRead < 4)
+            if (bytesRead < 4)
+            {
+                return Array.Empty<byte>();
+            }
+
+            var messageLength = BitConverter.ToInt32(messageLengthBytes);
+
+            if (messageLength == 0)
+            {
+                return Array.Empty<byte>();
+            }
+
+            var buffer = new byte[messageLength];
+            await client.GetStream().ReadAsync(buffer);
+
+            return buffer;
+        }
+        catch (IOException)
         {
             return Array.Empty<byte>();
         }
-        
-        var messageLength = BitConverter.ToInt32(messageLengthBytes);
-
-        if (messageLength == 0)
-        {
-            return Array.Empty<byte>();
-        }
-        
-        var buffer = new byte[messageLength];
-        await client.GetStream().ReadAsync(buffer);
-        
-        return buffer;
     }
 
     public async Task WriteAsync(string s)
